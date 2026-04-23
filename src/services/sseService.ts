@@ -419,7 +419,7 @@ export const handleSseConnection = async (req: Request, res: Response): Promise<
   // when upstream MCP server (especially stdio) takes a long time to respond
   const heartbeatInterval = setInterval(() => {
     if (!res.writableEnded) {
-      res.write(': keepalive\n\n');
+      res.write(': keepalive\n');
     }
   }, 30000);
 
