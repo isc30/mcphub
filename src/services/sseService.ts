@@ -415,7 +415,16 @@ export const handleSseConnection = async (req: Request, res: Response): Promise<
     keyName: bearerAuthResult.keyName,
   };
 
+  // Send periodic SSE heartbeat comments to prevent connection timeout
+  // when upstream MCP server (especially stdio) takes a long time to respond
+  const heartbeatInterval = setInterval(() => {
+    if (!res.writableEnded) {
+      res.write(': keepalive\n\n');
+    }
+  }, 30000);
+
   res.on('close', () => {
+    clearInterval(heartbeatInterval);
     delete transports[transport.sessionId];
     deleteMcpServer(transport.sessionId);
     console.log(`SSE connection closed: ${transport.sessionId}`);

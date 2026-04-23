@@ -205,15 +205,15 @@ describe('Keepalive Functionality', () => {
     jest.clearAllMocks();
   });
 
-  describe('SSE Connection (No Server-Side Keepalive)', () => {
-    // Server-side keepalive was removed - keepalive is now only for upstream MCP server connections (client-side)
-    // These tests verify that SSE connections work without server-side keepalive
+  describe('SSE Connection Heartbeat', () => {
+    // Server-side heartbeat sends SSE comments (: keepalive) to prevent timeout
+    // when upstream MCP servers (especially stdio) take a long time to respond
 
-    it('should establish SSE connection without keepalive interval', async () => {
+    it('should establish SSE connection with heartbeat interval', async () => {
       await handleSseConnection(mockReq as Request, mockRes as Response);
 
-      // Verify no keepalive interval was created for server-side SSE
-      expect(global.setInterval).not.toHaveBeenCalled();
+      // Verify a heartbeat interval was created for server-side SSE
+      expect(global.setInterval).toHaveBeenCalled();
     });
 
     it('should register close event handler for cleanup', async () => {
@@ -238,7 +238,22 @@ describe('Keepalive Functionality', () => {
       expect(transports['test-session-id']).toBeUndefined();
     });
 
-    it('should not send pings after connection is closed', async () => {
+    it('should clear heartbeat interval on connection close', async () => {
+      await handleSseConnection(mockReq as Request, mockRes as Response);
+
+      // Verify heartbeat interval was created
+      expect(intervals.length).toBeGreaterThan(0);
+
+      // Simulate connection close
+      if (eventListeners['close']) {
+        eventListeners['close']();
+      }
+
+      // Verify heartbeat interval was cleared
+      expect(global.clearInterval).toHaveBeenCalled();
+    });
+
+    it('should not send heartbeat after connection is closed', async () => {
       jest.useFakeTimers();
 
       await handleSseConnection(mockReq as Request, mockRes as Response);
@@ -248,14 +263,14 @@ describe('Keepalive Functionality', () => {
         eventListeners['close']();
       }
 
-      // Reset mock to count pings after close
-      mockTransportInstance.send.mockClear();
+      // Reset mock to count writes after close
+      (mockRes.write as jest.Mock).mockClear();
 
       // Fast-forward time by 60 seconds
       jest.advanceTimersByTime(60000);
 
-      // Verify no pings were sent after close
-      expect(mockTransportInstance.send).not.toHaveBeenCalled();
+      // Verify no heartbeat writes were sent after close
+      expect(mockRes.write).not.toHaveBeenCalled();
 
       jest.useRealTimers();
     });
