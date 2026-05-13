@@ -1,15 +1,141 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Group } from '@/types';
+import { Group, Server, IGroupServerConfig } from '@/types';
 import { useGroupData } from '@/hooks/useGroupData';
 import { useServerData } from '@/hooks/useServerData';
 import AddGroupForm from '@/components/AddGroupForm';
 import EditGroupForm from '@/components/EditGroupForm';
-import GroupCard from '@/components/GroupCard';
 import GroupImportForm from '@/components/GroupImportForm';
 import TemplateExportForm from '@/components/TemplateExportForm';
 import TemplateImportForm from '@/components/TemplateImportForm';
+import { Endpoint } from '@/components/ui/DesignPrimitives';
+import { getBasePath } from '@/utils/runtime';
 
+// ── Group card component ─────────────────────────────────────────────────
+interface GroupCardProps {
+  group: Group;
+  servers: Server[];
+  onEdit: (g: Group) => void;
+  onDelete: (id: string) => void;
+}
+
+const GroupCardItem: React.FC<GroupCardProps> = ({ group, servers, onEdit, onDelete }) => {
+  const basePath = getBasePath();
+  const endpointUrl = `${window.location.origin}${basePath}/mcp/${group.name}`;
+
+  const serverNames: string[] = group.servers.map((s) =>
+    typeof s === 'string' ? s : (s as IGroupServerConfig).name,
+  );
+
+  const serverStatuses = serverNames.map((name) => {
+    const found = servers.find((sv) => sv.name === name);
+    return {
+      name,
+      status: found?.status,
+      tools: found?.tools?.length || 0,
+      prompts: found?.prompts?.length || 0,
+    };
+  });
+
+  return (
+    <div className="card" style={{ overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line-2)', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+            <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.015em', color: 'var(--ink)' }}>{group.name}</span>
+            <span className="mono" style={{
+              fontSize: 11, color: 'var(--ink-3)', padding: '0 6px',
+              border: '1px solid var(--line)', borderRadius: 4, height: 18,
+              display: 'inline-flex', alignItems: 'center',
+            }}>{group.id.slice(0, 12)}…</span>
+          </div>
+          {group.description && (
+            <div style={{ fontSize: 12.5, color: 'var(--ink-3)' }}>{group.description}</div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+          <button className="icon-btn" onClick={() => onEdit(group)} title="编辑">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 3l7 7-11 11H3v-7z"/><path d="M13 4l7 7"/>
+            </svg>
+          </button>
+          <button className="icon-btn" onClick={() => onDelete(group.id)} title="删除" style={{ color: 'var(--err)' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Routing diagram */}
+      <div style={{ padding: '14px 16px 16px', display: 'grid', gridTemplateColumns: '1fr 60px 1fr', alignItems: 'center', gap: 10 }}>
+        {/* Left: servers */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {serverStatuses.length === 0 ? (
+            <div style={{ padding: '8px 10px', background: 'var(--bg-2)', border: '1px dashed var(--line)', borderRadius: 7, fontSize: 12, color: 'var(--ink-3)', textAlign: 'center' }}>
+              无服务
+            </div>
+          ) : (
+            serverStatuses.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'var(--bg-2)', border: '1px solid var(--line-2)', borderRadius: 7 }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', flex: '0 0 6px',
+                  background: s.status === 'connected' ? 'var(--ok)' : s.status === 'connecting' ? 'var(--warn)' : 'var(--err)',
+                }} />
+                <span className="mono" style={{ fontSize: 12.5, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                <span className="mono" style={{ fontSize: 11, color: 'var(--ink-3)', flexShrink: 0 }}>{s.tools}T</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Center: arrow */}
+        <svg width="60" height={Math.max(40, serverStatuses.length * 40)} viewBox={`0 0 60 ${Math.max(40, serverStatuses.length * 40)}`} style={{ alignSelf: 'center' }}>
+          {serverStatuses.length === 0 ? (
+            <path d="M0,20 C 20,20 40,20 60,20" stroke="var(--line)" strokeWidth="1" fill="none" strokeDasharray="3 3" />
+          ) : (
+            serverStatuses.map((_, i) => {
+              const h = Math.max(40, serverStatuses.length * 40);
+              const y1 = (h / serverStatuses.length) * (i + 0.5);
+              const mid = h / 2;
+              return <path key={i} d={`M0,${y1} C 20,${y1} 40,${mid} 60,${mid}`} stroke="var(--line)" strokeWidth="1" fill="none" strokeDasharray="3 3" />;
+            })
+          )}
+          <circle cx="60" cy={Math.max(40, serverStatuses.length * 40) / 2} r="4" fill="var(--ink)" />
+        </svg>
+
+        {/* Right: endpoint */}
+        <div style={{ padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 8, background: 'var(--bg-2)' }}>
+          <div style={{ fontSize: 11, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>endpoint</div>
+          <div className="mono" style={{ fontSize: 12, color: 'var(--ink-2)', wordBreak: 'break-all', lineHeight: 1.4, marginBottom: 8 }}>
+            <span style={{ color: 'var(--ink-3)' }}>/mcp/</span>
+            <b style={{ color: 'var(--ink)', fontWeight: 600 }}>{group.name}</b>
+          </div>
+          <Endpoint url={endpointUrl} />
+        </div>
+      </div>
+
+      {/* Footer stats */}
+      <div style={{ padding: '10px 16px', borderTop: '1px solid var(--line-2)', background: 'var(--bg-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: 'var(--ink-3)' }}>
+        <div className="mono">
+          <span style={{ color: 'var(--ink-2)' }}>{serverNames.length}</span> 服务 ·{' '}
+          <span style={{ color: 'var(--ink-2)' }}>
+            {serverStatuses.reduce((a, s) => a + s.tools, 0)}
+          </span> 工具
+        </div>
+        <button className="ds-btn sm ghost" onClick={() => onEdit(group)} style={{ color: 'var(--ink-3)' }}>
+          设置可见性
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ── Main page ─────────────────────────────────────────────────────────────
 const GroupsPage: React.FC = () => {
   const { t } = useTranslation();
   const {
@@ -28,15 +154,6 @@ const GroupsPage: React.FC = () => {
   const [showTemplateExport, setShowTemplateExport] = useState(false);
   const [showTemplateImport, setShowTemplateImport] = useState(false);
 
-  const handleEditClick = (group: Group) => {
-    setEditingGroup(group);
-  };
-
-  const handleEditComplete = () => {
-    setEditingGroup(null);
-    triggerRefresh(); // Refresh the groups list after editing
-  };
-
   const handleDeleteGroup = async (groupId: string) => {
     const result = await deleteGroup(groupId);
     if (!result || !result.success) {
@@ -44,185 +161,117 @@ const GroupsPage: React.FC = () => {
     }
   };
 
-  const handleAddGroup = () => {
-    setShowAddForm(true);
-  };
-
-  const handleAddComplete = () => {
-    setShowAddForm(false);
-    triggerRefresh(); // Refresh the groups list after adding
-  };
-
-  const handleImportSuccess = () => {
-    setShowImportForm(false);
-    triggerRefresh(); // Refresh the groups list after import
-  };
-
-  const handleTemplateImportSuccess = () => {
-    setShowTemplateImport(false);
-    triggerRefresh();
-  };
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">{t('pages.groups.title')}</h1>
-        <div className="flex space-x-4">
-          <button
-            onClick={handleAddGroup}
-            className="px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center btn-primary transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {t('groups.add')}
-          </button>
-          <button
-            onClick={() => setShowImportForm(true)}
-            className="px-4 py-2 bg-blue-100 text-blue-800 rounded hover:bg-blue-200 flex items-center btn-primary transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
+    <div className="scroll-pad page-fade-in">
+      {/* Page header */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 22 }}>
+        <div>
+          <h1 className="h-page">{t('pages.groups.title')}</h1>
+          <p className="h-page-sub">
+            {groups.length} 个分组 · 把多个服务聚合为单一端点 · 支持工具级可见性控制
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setShowImportForm(true)} className="ds-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             {t('groupImport.button')}
           </button>
-          <button
-            onClick={() => setShowTemplateExport(true)}
-            className="px-4 py-2 bg-green-100 text-green-800 rounded hover:bg-green-200 flex items-center btn-primary transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
+          <button onClick={() => setShowTemplateExport(true)} className="ds-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
             {t('template.exportButton')}
           </button>
-          <button
-            onClick={() => setShowTemplateImport(true)}
-            className="px-4 py-2 bg-green-100 text-green-800 rounded hover:bg-green-200 flex items-center btn-primary transition-all duration-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 mr-2"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
+          <button onClick={() => setShowTemplateImport(true)} className="ds-btn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
             {t('template.importButton')}
+          </button>
+          <button onClick={() => setShowAddForm(true)} className="ds-btn primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            {t('groups.add')}
           </button>
         </div>
       </div>
 
+      {/* Error */}
       {groupError && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 error-box rounded-lg">
-          <p>{groupError}</p>
+        <div className="error-box" style={{ padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 10 }}>
+          <span style={{ fontSize: 13, color: 'var(--err)' }}>{groupError}</span>
+          <button onClick={() => setGroupError(null)} className="icon-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 6l12 12M18 6L6 18"/>
+            </svg>
+          </button>
         </div>
       )}
 
+      {/* Content */}
       {groupsLoading ? (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 loading-container">
-          <div className="flex flex-col items-center justify-center">
-            <svg
-              className="animate-spin h-10 w-10 text-blue-500 mb-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <p className="text-gray-600">{t('app.loading')}</p>
-          </div>
+        <div className="card" style={{ padding: 48, textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>
+          {t('app.loading')}
         </div>
       ) : groups.length === 0 ? (
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 empty-state">
-          <p className="text-gray-600">{t('groups.noGroups')}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          {/* Empty create card */}
+          <div
+            className="card"
+            onClick={() => setShowAddForm(true)}
+            style={{ border: '1px dashed var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, cursor: 'pointer', background: 'transparent' }}
+          >
+            <div style={{ textAlign: 'center', color: 'var(--ink-3)' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid var(--line)', display: 'grid', placeItems: 'center', margin: '0 auto 10px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-2)' }}>新建分组</div>
+              <div style={{ fontSize: 12, marginTop: 2 }}>把相关服务聚合为一个 URL</div>
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
           {groups.map((group) => (
-            <GroupCard
+            <GroupCardItem
               key={group.id}
               group={group}
               servers={allServers}
-              onEdit={handleEditClick}
+              onEdit={(g) => setEditingGroup(g)}
               onDelete={handleDeleteGroup}
             />
           ))}
+
+          {/* Create new card */}
+          <div
+            className="card"
+            onClick={() => setShowAddForm(true)}
+            style={{ border: '1px dashed var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 200, cursor: 'pointer', background: 'transparent' }}
+          >
+            <div style={{ textAlign: 'center', color: 'var(--ink-3)' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid var(--line)', display: 'grid', placeItems: 'center', margin: '0 auto 10px' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-2)' }}>新建分组</div>
+              <div style={{ fontSize: 12, marginTop: 2 }}>把相关服务聚合为一个 URL</div>
+            </div>
+          </div>
         </div>
       )}
 
-      {showAddForm && <AddGroupForm onAdd={handleAddComplete} onCancel={handleAddComplete} />}
-
-      {showImportForm && (
-        <GroupImportForm
-          onSuccess={handleImportSuccess}
-          onCancel={() => setShowImportForm(false)}
-        />
-      )}
-
-      {editingGroup && (
-        <EditGroupForm
-          group={editingGroup}
-          onEdit={handleEditComplete}
-          onCancel={() => setEditingGroup(null)}
-        />
-      )}
-
-      {showTemplateExport && (
-        <TemplateExportForm
-          groups={groups}
-          onCancel={() => setShowTemplateExport(false)}
-        />
-      )}
-
-      {showTemplateImport && (
-        <TemplateImportForm
-          onSuccess={handleTemplateImportSuccess}
-          onCancel={() => setShowTemplateImport(false)}
-        />
-      )}
+      {/* Modals */}
+      {showAddForm && <AddGroupForm onAdd={() => { setShowAddForm(false); triggerRefresh(); }} onCancel={() => setShowAddForm(false)} />}
+      {showImportForm && <GroupImportForm onSuccess={() => { setShowImportForm(false); triggerRefresh(); }} onCancel={() => setShowImportForm(false)} />}
+      {editingGroup && <EditGroupForm group={editingGroup} onEdit={() => { setEditingGroup(null); triggerRefresh(); }} onCancel={() => setEditingGroup(null)} />}
+      {showTemplateExport && <TemplateExportForm groups={groups} onCancel={() => setShowTemplateExport(false)} />}
+      {showTemplateImport && <TemplateImportForm onSuccess={() => { setShowTemplateImport(false); triggerRefresh(); }} onCancel={() => setShowTemplateImport(false)} />}
     </div>
   );
 };

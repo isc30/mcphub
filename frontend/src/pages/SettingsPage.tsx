@@ -171,28 +171,28 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
   if (isEditing) {
     return (
       <tr>
-        <td colSpan={5} className="p-0 border-b border-gray-200 dark:border-gray-700">
-          <div className="bg-gray-50 dark:bg-gray-800 p-5">
+        <td colSpan={5} style={{ padding: 0, borderBottom: '1px solid var(--line)' }}>
+          <div style={{ background: 'var(--bg-2)', padding: 18 }}>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
               <div className="md:col-span-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                   {t('settings.bearerKeyName') || 'Name'}
                 </label>
                 <input
                   type="text"
-                  className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input transition-shadow duration-200"
+                  className="ds-input" style={{ width: '100%' }}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={loading}
                 />
               </div>
               <div className="md:col-span-9">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                   {t('settings.bearerKeyToken') || 'Token'}
                 </label>
                 <input
                   type="text"
-                  className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input transition-shadow duration-200"
+                  className="ds-input" style={{ width: '100%' }}
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   disabled={loading}
@@ -202,10 +202,10 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
 
             <div className="flex flex-wrap items-end gap-4">
               <div className="w-40">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                   {t('settings.bearerKeyEnabled') || 'Status'}
                 </label>
-                <div className="flex items-center h-[38px] px-3 bg-white dark:bg-gray-800 border border-gray-300 rounded-md">
+                <div style={{ display: 'flex', alignItems: 'center', height: 36, padding: '0 12px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 7 }}>
                   <span
                     className={`text-sm mr-3 ${enabled ? 'text-green-600 font-medium' : 'text-gray-500'}`}
                   >
@@ -220,11 +220,11 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
               </div>
 
               <div className="w-48">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                   {t('settings.bearerKeyAccessType') || 'Access scope'}
                 </label>
                 <select
-                  className="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-select transition-shadow duration-200"
+                  className="ds-input" style={{ width: '100%' }}
                   value={accessType}
                   onChange={(e) =>
                     setAccessType(e.target.value as 'all' | 'groups' | 'servers' | 'custom')
@@ -272,7 +272,7 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
               {isCustomMode && (
                 <>
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                       {t('settings.bearerKeyAllowedGroups') || 'Allowed groups'}
                     </label>
                     <MultiSelect
@@ -284,7 +284,7 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
                     />
                   </div>
                   <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                       {t('settings.bearerKeyAllowedServers') || 'Allowed servers'}
                     </label>
                     <MultiSelect
@@ -302,7 +302,7 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 h-[38px]"
+                  className="ds-btn"
                 >
                   {t('common.cancel') || 'Cancel'}
                 </button>
@@ -310,7 +310,7 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
                   type="button"
                   onClick={handleSave}
                   disabled={loading || saving}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary h-[38px]"
+                  className="ds-btn primary"
                 >
                   {saving ? t('common.saving') || 'Saving...' : t('common.save') || 'Save'}
                 </button>
@@ -323,12 +323,12 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
   }
 
   return (
-    <tr className="hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700">
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+    <tr style={{ borderBottom: '1px solid var(--line-2)' }}>
+      <td style={{ padding: '10px 14px', fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
         {keyData.name}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-        <div className="flex items-center gap-2">
+      <td style={{ padding: '10px 14px', fontSize: 12, color: 'var(--ink-3)', fontFamily: 'var(--mono)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span>
             {keyData.token.length > 12
               ? `${keyData.token.substring(0, 8)}...${keyData.token.substring(keyData.token.length - 4)}`
@@ -336,36 +336,37 @@ const BearerKeyRow: React.FC<BearerKeyRowProps> = ({
           </span>
           <button
             onClick={handleCopyToken}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="icon-btn"
             title={t('common.copy') || 'Copy'}
           >
             <Copy className="h-3.5 w-3.5" />
           </button>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${keyData.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
-        >
+      <td style={{ padding: '10px 14px' }}>
+        <span className={`ds-pill ${keyData.enabled ? 'ok' : 'muted'}`}>
+          <span className="d" />
           {keyData.enabled ? t('common.active') || 'Active' : t('common.inactive') || 'Inactive'}
         </span>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      <td style={{ padding: '10px 14px', fontSize: 12, color: 'var(--ink-3)' }}>
         {formatAccessTypeDisplay(keyData)}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+      <td style={{ padding: '10px 14px', textAlign: 'right' }}>
         <button
           onClick={() => setIsEditing(true)}
-          className="text-blue-600 hover:text-blue-900 mr-4 inline-flex items-center"
+          className="icon-btn"
           title={t('common.edit') || 'Edit'}
+          style={{ marginRight: 8 }}
         >
           <Edit className="h-4 w-4" />
         </button>
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="text-red-600 hover:text-red-900 inline-flex items-center"
+          className="icon-btn"
           title={t('common.delete') || 'Delete'}
+          style={{ color: 'var(--err)' }}
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -1224,32 +1225,35 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">{t('pages.settings.title')}</h1>
+    <div className="scroll-pad page-fade-in">
+      <div style={{ marginBottom: 22 }}>
+        <h1 className="h-page">{t('pages.settings.title')}</h1>
+        <p className="h-page-sub">认证、路由、嵌入模型与系统配置</p>
+      </div>
 
       {/* Bearer Keys Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_ROUTE_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 page-card dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('bearerKeys')}
           >
-            <h2 className="font-semibold text-gray-800">
+            <h2 className="h-card">
               {t('settings.bearerKeysSectionTitle') || 'Bearer authentication keys'}
             </h2>
-            <span className="text-gray-500 transition-transform duration-200">
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>
               {sectionsVisible.bearerKeys ? '▼' : '►'}
             </span>
           </div>
 
           {sectionsVisible.bearerKeys && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.enableBearerAuth') || 'Enable Bearer Authentication'}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableBearerAuthDescription') ||
                       'Require bearer token authentication for MCP requests'}
                   </p>
@@ -1263,12 +1267,12 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.bearerAuthHeaderName')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.bearerAuthHeaderNameDescription')}
                   </p>
                 </div>
@@ -1280,7 +1284,7 @@ const SettingsPage: React.FC = () => {
                       handleTempRoutingConfigChange('bearerAuthHeaderName', e.target.value)
                     }
                     placeholder={t('settings.bearerAuthHeaderNamePlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
@@ -1291,7 +1295,7 @@ const SettingsPage: React.FC = () => {
                       )
                     }
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
@@ -1299,7 +1303,7 @@ const SettingsPage: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-600">
+                <p style={{ fontSize: 12, color: 'var(--ink-2)' }}>
                   {t('settings.bearerKeysSectionDescription') ||
                     'Manage multiple bearer authentication keys with different access scopes.'}
                 </p>
@@ -1307,7 +1311,7 @@ const SettingsPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowAddBearerKeyForm(true)}
-                    className="flex items-center text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                    className="ds-btn primary sm"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1328,47 +1332,32 @@ const SettingsPage: React.FC = () => {
 
               {/* Existing keys */}
               {bearerKeys.length === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                   {t('settings.noBearerKeys') || 'No bearer keys configured yet.'}
                 </p>
               ) : (
-                <div className="mt-2 overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <thead className="bg-gray-50 dark:bg-gray-800">
+                <div style={{ marginTop: 8, overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--line)', borderRadius: 8, overflow: 'hidden' }}>
+                    <thead style={{ background: 'var(--bg-2)' }}>
                       <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
+                        <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {t('settings.bearerKeyName') || 'Name'}
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
+                        <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {t('settings.bearerKeyToken') || 'Token'}
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
+                        <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {t('settings.bearerKeyEnabled') || 'Status'}
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
+                        <th style={{ padding: '8px 14px', textAlign: 'left', fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {t('settings.bearerKeyAccessType') || 'Access Scope'}
                         </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                        >
+                        <th style={{ padding: '8px 14px', textAlign: 'right', fontSize: 11, fontWeight: 500, color: 'var(--ink-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {t('common.actions') || 'Actions'}
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody>
                       {bearerKeys.map((key) => (
                         <BearerKeyRow
                           key={key.id}
@@ -1387,8 +1376,8 @@ const SettingsPage: React.FC = () => {
 
               {/* New key form */}
               {showAddBearerKeyForm && (
-                <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700">
+                <div style={{ marginTop: 16, borderTop: '1px solid var(--line)', paddingTop: 16 }}>
+                  <div style={{ background: 'var(--bg-2)', borderRadius: 8, padding: 18, border: '1px solid var(--line)' }}>
                     <h3 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                       <span className="bg-blue-100 text-blue-600 p-1 rounded">
                         <svg
@@ -1409,12 +1398,12 @@ const SettingsPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
                       <div className="md:col-span-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                           {t('settings.bearerKeyName') || 'Name'}
                         </label>
                         <input
                           type="text"
-                          className="block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input transition-shadow duration-200"
+                          className="ds-input" style={{ width: '100%' }}
                           placeholder="e.g. My API Key"
                           value={newBearerKey.name}
                           onChange={(e) =>
@@ -1424,13 +1413,13 @@ const SettingsPage: React.FC = () => {
                         />
                       </div>
                       <div className="md:col-span-9">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                           {t('settings.bearerKeyToken') || 'Token'}
                         </label>
                         <div className="flex rounded-md shadow-sm">
                           <input
                             type="text"
-                            className="flex-1 block w-full py-2 px-3 border border-gray-300 rounded-l-md rounded-r-none border-r-0 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input transition-shadow duration-200"
+                            className="ds-input" style={{ flex: 1, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRight: 0 }}
                             placeholder="sk-..."
                             value={newBearerKey.token}
                             onChange={(e) =>
@@ -1444,7 +1433,7 @@ const SettingsPage: React.FC = () => {
                               setNewBearerKey((prev) => ({ ...prev, token: generateRandomKey() }))
                             }
                             disabled={loading}
-                            className="relative -ml-[5px] inline-flex items-center px-4 py-2 border border-gray-300 bg-gray-100 dark:bg-gray-800 text-gray-700 text-sm font-medium rounded-r-md rounded-l-none hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 z-10"
+                            className="ds-btn" style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                           >
                             {t('settings.generate') || 'Generate'}
                           </button>
@@ -1454,10 +1443,10 @@ const SettingsPage: React.FC = () => {
 
                     <div className="flex flex-wrap items-end gap-4 mb-2">
                       <div className="w-40">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                           {t('settings.bearerKeyEnabled') || 'Status'}
                         </label>
-                        <div className="flex items-center h-[38px] px-3 bg-white dark:bg-gray-800 border border-gray-300 rounded-md">
+                        <div style={{ display: 'flex', alignItems: 'center', height: 36, padding: '0 12px', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 7 }}>
                           <span
                             className={`text-sm mr-3 ${newBearerKey.enabled ? 'text-green-600 font-medium' : 'text-gray-500'}`}
                           >
@@ -1474,11 +1463,11 @@ const SettingsPage: React.FC = () => {
                       </div>
 
                       <div className="w-48">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                           {t('settings.bearerKeyAccessType') || 'Access scope'}
                         </label>
                         <select
-                          className="block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-select transition-shadow duration-200"
+                          className="ds-input" style={{ width: '100%' }}
                           value={newBearerKey.accessType}
                           onChange={(e) =>
                             setNewBearerKey((prev) => ({
@@ -1541,7 +1530,7 @@ const SettingsPage: React.FC = () => {
                       {newBearerKey.accessType === 'custom' && (
                         <>
                           <div className="flex-1 min-w-[200px]">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                               {t('settings.bearerKeyAllowedGroups') || 'Allowed groups'}
                             </label>
                             <MultiSelect
@@ -1553,7 +1542,7 @@ const SettingsPage: React.FC = () => {
                             />
                           </div>
                           <div className="flex-1 min-w-[200px]">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label style={{ display: 'block', fontSize: 12, color: 'var(--ink-2)', fontWeight: 500, marginBottom: 5 }}>
                               {t('settings.bearerKeyAllowedServers') || 'Allowed servers'}
                             </label>
                             <MultiSelect
@@ -1571,7 +1560,7 @@ const SettingsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowAddBearerKeyForm(false)}
-                          className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 h-[38px]"
+                          className="ds-btn"
                         >
                           {t('common.cancel') || 'Cancel'}
                         </button>
@@ -1579,7 +1568,7 @@ const SettingsPage: React.FC = () => {
                           type="button"
                           onClick={handleCreateBearerKey}
                           disabled={loading}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary h-[38px]"
+                          className="ds-btn primary"
                         >
                           {t('settings.addBearerKeyButton') || 'Create Key'}
                         </button>
@@ -1595,23 +1584,23 @@ const SettingsPage: React.FC = () => {
 
       {/* Smart Routing Configuration Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_SMART_ROUTING}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 page-card dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('smartRoutingConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('pages.settings.smartRouting')}</h2>
-            <span className="text-gray-500 transition-transform duration-200">
+            <h2 className="h-card">{t('pages.settings.smartRouting')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>
               {sectionsVisible.smartRoutingConfig ? '▼' : '►'}
             </span>
           </div>
 
           {sectionsVisible.smartRoutingConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.enableSmartRouting')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.enableSmartRouting')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableSmartRoutingDescription')}
                   </p>
                 </div>
@@ -1623,17 +1612,17 @@ const SettingsPage: React.FC = () => {
               </div>
 
               {/* Smart Routing Required Fields Information */}
-              <div className="p-3 bg-blue-300 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800">
+              <div style={{ padding: '10px 14px', background: 'var(--accent-soft)', border: '1px solid var(--accent)', borderRadius: 8 }}>
+                <p style={{ fontSize: 12.5, color: 'var(--ink-2)' }}>
                   {t('settings.smartRoutingRequiredFields')}
                 </p>
               </div>
 
               {/* hide when DB_URL env is set */}
               {smartRoutingConfig.dbUrl !== '${DB_URL}' && (
-                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                   <div className="mb-2">
-                    <h3 className="font-medium text-gray-700">
+                    <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                       <span className="text-red-500 px-1">*</span>
                       {t('settings.dbUrl')}
                     </h3>
@@ -1644,22 +1633,22 @@ const SettingsPage: React.FC = () => {
                       value={tempSmartRoutingConfig.dbUrl}
                       onChange={(e) => handleSmartRoutingConfigChange('dbUrl', e.target.value)}
                       placeholder={t('settings.dbUrlPlaceholder')}
-                      className="flex-1 mt-1 block w-full py-2 px-3 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 form-input"
+                      className="ds-input" style={{ flex: 1 }}
                       disabled={loading}
                     />
                   </div>
                 </div>
               )}
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.embeddingProvider') || 'Embedding Provider'}
                   </h3>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 bg-white dark:bg-gray-800 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-select"
+                    className="ds-input" style={{ flex: 1 }}
                     value={tempSmartRoutingConfig.embeddingProvider}
                     onChange={(e) =>
                       handleSmartRoutingConfigChange(
@@ -1677,9 +1666,9 @@ const SettingsPage: React.FC = () => {
 
               {tempSmartRoutingConfig.embeddingProvider === 'openai' ? (
                 <>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.openaiApiKey')}
                       </h3>
@@ -1698,9 +1687,9 @@ const SettingsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.openaiApiBaseUrl')}
                       </h3>
@@ -1713,16 +1702,16 @@ const SettingsPage: React.FC = () => {
                           handleSmartRoutingConfigChange('openaiApiBaseUrl', e.target.value)
                         }
                         placeholder={t('settings.openaiApiBaseUrlPlaceholder')}
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.openaiApiEmbeddingModel')}
                       </h3>
@@ -1735,7 +1724,7 @@ const SettingsPage: React.FC = () => {
                           handleSmartRoutingConfigChange('openaiApiEmbeddingModel', e.target.value)
                         }
                         placeholder={t('settings.openaiApiEmbeddingModelPlaceholder')}
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                         required
                       />
@@ -1744,9 +1733,9 @@ const SettingsPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.azureOpenaiEndpoint') || 'Azure OpenAI Endpoint'}
                       </h3>
@@ -1762,15 +1751,15 @@ const SettingsPage: React.FC = () => {
                           t('settings.azureOpenaiEndpointPlaceholder') ||
                           'https://YOUR_RESOURCE_NAME.openai.azure.com'
                         }
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.azureOpenaiApiKey') || 'Azure OpenAI API Key'}
                       </h3>
@@ -1789,9 +1778,9 @@ const SettingsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.azureOpenaiApiVersion') || 'Azure OpenAI API Version'}
                       </h3>
@@ -1806,15 +1795,15 @@ const SettingsPage: React.FC = () => {
                         placeholder={
                           t('settings.azureOpenaiApiVersionPlaceholder') || '2024-02-15-preview'
                         }
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.azureOpenaiEmbeddingDeployment') ||
                           'Azure Embedding Deployment'}
@@ -1834,15 +1823,15 @@ const SettingsPage: React.FC = () => {
                           t('settings.azureOpenaiEmbeddingDeploymentPlaceholder') ||
                           'your-embedding-deployment-name'
                         }
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                     <div className="mb-2">
-                      <h3 className="font-medium text-gray-700">
+                      <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                         <span className="text-red-500 px-1">*</span>
                         {t('settings.azureOpenaiEmbeddingModel') || 'Azure Embedding Model Name'}
                       </h3>
@@ -1865,7 +1854,7 @@ const SettingsPage: React.FC = () => {
                           t('settings.azureOpenaiEmbeddingModelPlaceholder') ||
                           'text-embedding-3-small'
                         }
-                        className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                        className="ds-input" style={{ flex: 1 }}
                         disabled={loading}
                         required
                       />
@@ -1874,9 +1863,9 @@ const SettingsPage: React.FC = () => {
                 </>
               )}
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.basePacingDelayMs')}
                   </h3>
                   <p className="text-xs text-gray-500 mt-1">
@@ -1895,7 +1884,7 @@ const SettingsPage: React.FC = () => {
                     placeholder={
                       t('settings.basePacingDelayMsPlaceholder') || 'Empty = default 0 ms'
                     }
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                 </div>
@@ -1915,9 +1904,9 @@ const SettingsPage: React.FC = () => {
 
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.embeddingEncodingFormat')}
                   </h3>
                   <p className="text-xs text-gray-500 mt-1">
@@ -1933,7 +1922,7 @@ const SettingsPage: React.FC = () => {
                         e.target.value as 'auto' | 'base64' | 'float',
                       )
                     }
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-select"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   >
                     <option value="auto">
@@ -1945,9 +1934,9 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.embeddingMaxTokens')}
                   </h3>
                   <p className="text-xs text-gray-500 mt-1">
@@ -1965,7 +1954,7 @@ const SettingsPage: React.FC = () => {
                     placeholder={
                       t('settings.embeddingMaxTokensPlaceholder') || 'Empty = auto by model'
                     }
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                 </div>
@@ -1989,12 +1978,12 @@ const SettingsPage: React.FC = () => {
                 </p>
               </div>
               
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.progressiveDisclosure')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.progressiveDisclosureDescription')}
                   </p>
                 </div>
@@ -2011,7 +2000,7 @@ const SettingsPage: React.FC = () => {
                 <button
                   onClick={handleSaveSmartRoutingConfig}
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                  className="ds-btn primary"
                 >
                   {t('common.save')}
                 </button>
@@ -2023,21 +2012,21 @@ const SettingsPage: React.FC = () => {
 
       {/* OAuth Server Configuration Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_OAUTH_SERVER}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('oauthServerConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('pages.settings.oauthServer')}</h2>
-            <span className="text-gray-500">{sectionsVisible.oauthServerConfig ? '▼' : '►'}</span>
+            <h2 className="h-card">{t('pages.settings.oauthServer')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.oauthServerConfig ? '▼' : '►'}</span>
           </div>
 
           {sectionsVisible.oauthServerConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.enableOauthServer')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.enableOauthServer')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableOauthServerDescription')}
                   </p>
                 </div>
@@ -2048,10 +2037,10 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.requireClientSecret')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.requireClientSecret')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.requireClientSecretDescription')}
                   </p>
                 </div>
@@ -2064,10 +2053,10 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.requireState')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.requireStateDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.requireState')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.requireStateDescription')}</p>
                 </div>
                 <Switch
                   disabled={loading || !oauthServerConfig.enabled}
@@ -2076,10 +2065,10 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.accessTokenLifetime')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.accessTokenLifetime')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.accessTokenLifetimeDescription')}
                   </p>
                 </div>
@@ -2091,25 +2080,25 @@ const SettingsPage: React.FC = () => {
                       handleOAuthServerNumberChange('accessTokenLifetime', e.target.value)
                     }
                     placeholder={t('settings.accessTokenLifetimePlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveOAuthServerNumberConfig('accessTokenLifetime')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.refreshTokenLifetime')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.refreshTokenLifetimeDescription')}
                   </p>
                 </div>
@@ -2121,25 +2110,25 @@ const SettingsPage: React.FC = () => {
                       handleOAuthServerNumberChange('refreshTokenLifetime', e.target.value)
                     }
                     placeholder={t('settings.refreshTokenLifetimePlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveOAuthServerNumberConfig('refreshTokenLifetime')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.authorizationCodeLifetime')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.authorizationCodeLifetimeDescription')}
                   </p>
                 </div>
@@ -2151,23 +2140,23 @@ const SettingsPage: React.FC = () => {
                       handleOAuthServerNumberChange('authorizationCodeLifetime', e.target.value)
                     }
                     placeholder={t('settings.authorizationCodeLifetimePlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveOAuthServerNumberConfig('authorizationCodeLifetime')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.allowedScopes')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.allowedScopesDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.allowedScopes')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.allowedScopesDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2175,26 +2164,26 @@ const SettingsPage: React.FC = () => {
                     value={tempOAuthServerConfig.allowedScopes}
                     onChange={(e) => handleOAuthServerTextChange('allowedScopes', e.target.value)}
                     placeholder={t('settings.allowedScopesPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={saveOAuthServerAllowedScopes}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md space-y-4">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-medium text-gray-700">
+                    <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                       {t('settings.enableDynamicRegistration')}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                       {t('settings.dynamicRegistrationDescription')}
                     </p>
                   </div>
@@ -2209,10 +2198,10 @@ const SettingsPage: React.FC = () => {
 
                 <div>
                   <div className="mb-2">
-                    <h3 className="font-medium text-gray-700">
+                    <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                       {t('settings.dynamicRegistrationAllowedGrantTypes')}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                       {t('settings.dynamicRegistrationAllowedGrantTypesDescription')}
                     </p>
                   </div>
@@ -2227,7 +2216,7 @@ const SettingsPage: React.FC = () => {
                         )
                       }
                       placeholder={t('settings.dynamicRegistrationAllowedGrantTypesPlaceholder')}
-                      className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                      className="ds-input" style={{ flex: 1 }}
                       disabled={
                         loading ||
                         !oauthServerConfig.enabled ||
@@ -2241,7 +2230,7 @@ const SettingsPage: React.FC = () => {
                         !oauthServerConfig.enabled ||
                         !oauthServerConfig.dynamicRegistration.enabled
                       }
-                      className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                      className="ds-btn primary"
                     >
                       {t('common.save')}
                     </button>
@@ -2250,10 +2239,10 @@ const SettingsPage: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-700">
+                    <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                       {t('settings.dynamicRegistrationAuth')}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                       {t('settings.dynamicRegistrationAuthDescription')}
                     </p>
                   </div>
@@ -2277,23 +2266,23 @@ const SettingsPage: React.FC = () => {
 
       {/* MCPRouter Configuration Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_INSTALL_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 page-card dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('mcpRouterConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('settings.mcpRouterConfig')}</h2>
-            <span className="text-gray-500 transition-transform duration-200">
+            <h2 className="h-card">{t('settings.mcpRouterConfig')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>
               {sectionsVisible.mcpRouterConfig ? '▼' : '►'}
             </span>
           </div>
 
           {sectionsVisible.mcpRouterConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.mcpRouterApiKey')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.mcpRouterApiKey')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.mcpRouterApiKeyDescription')}
                   </p>
                 </div>
@@ -2303,23 +2292,23 @@ const SettingsPage: React.FC = () => {
                     value={tempMCPRouterConfig.apiKey}
                     onChange={(e) => handleMCPRouterConfigChange('apiKey', e.target.value)}
                     placeholder={t('settings.mcpRouterApiKeyPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveMCPRouterConfig('apiKey')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.mcpRouterBaseUrl')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.mcpRouterBaseUrl')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.mcpRouterBaseUrlDescription')}
                   </p>
                 </div>
@@ -2329,13 +2318,13 @@ const SettingsPage: React.FC = () => {
                     value={tempMCPRouterConfig.baseUrl}
                     onChange={(e) => handleMCPRouterConfigChange('baseUrl', e.target.value)}
                     placeholder={t('settings.mcpRouterBaseUrlPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveMCPRouterConfig('baseUrl')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
@@ -2348,21 +2337,21 @@ const SettingsPage: React.FC = () => {
 
       {/* System Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_SYSTEM_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('nameSeparator')}
           >
-            <h2 className="font-semibold text-gray-800">{t('settings.systemSettings')}</h2>
-            <span className="text-gray-500">{sectionsVisible.nameSeparator ? '▼' : '►'}</span>
+            <h2 className="h-card">{t('settings.systemSettings')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.nameSeparator ? '▼' : '►'}</span>
           </div>
 
           {sectionsVisible.nameSeparator && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.nameSeparatorLabel')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.nameSeparatorDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.nameSeparatorLabel')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.nameSeparatorDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2370,26 +2359,26 @@ const SettingsPage: React.FC = () => {
                     value={tempNameSeparator}
                     onChange={(e) => setTempNameSeparator(e.target.value)}
                     placeholder="-"
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                     maxLength={5}
                   />
                   <button
                     onClick={saveNameSeparator}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.enableSessionRebuild')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableSessionRebuildDescription')}
                   </p>
                 </div>
@@ -2406,21 +2395,21 @@ const SettingsPage: React.FC = () => {
 
       {/* Route Configuration Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_ROUTE_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('routingConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('pages.settings.routeConfig')}</h2>
-            <span className="text-gray-500">{sectionsVisible.routingConfig ? '▼' : '►'}</span>
+            <h2 className="h-card">{t('pages.settings.routeConfig')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.routingConfig ? '▼' : '►'}</span>
           </div>
 
           {sectionsVisible.routingConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.enableGlobalRoute')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.enableGlobalRoute')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableGlobalRouteDescription')}
                   </p>
                 </div>
@@ -2433,12 +2422,12 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>
                     {t('settings.enableGroupNameRoute')}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.enableGroupNameRouteDescription')}
                   </p>
                 </div>
@@ -2451,10 +2440,10 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div>
-                  <h3 className="font-medium text-gray-700">{t('settings.skipAuth')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.skipAuthDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.skipAuth')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.skipAuthDescription')}</p>
                 </div>
                 <Switch
                   disabled={loading}
@@ -2463,10 +2452,10 @@ const SettingsPage: React.FC = () => {
                 />
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.jsonBodyLimit')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.jsonBodyLimitDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.jsonBodyLimit')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.jsonBodyLimitDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2474,13 +2463,13 @@ const SettingsPage: React.FC = () => {
                     value={tempRoutingConfig.jsonBodyLimit}
                     onChange={(e) => handleTempRoutingConfigChange('jsonBodyLimit', e.target.value)}
                     placeholder={t('settings.jsonBodyLimitPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => handleRoutingConfigChange('jsonBodyLimit', tempRoutingConfig.jsonBodyLimit)}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
@@ -2493,21 +2482,21 @@ const SettingsPage: React.FC = () => {
 
       {/* Installation Configuration Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_INSTALL_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('installConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('settings.installConfig')}</h2>
-            <span className="text-gray-500">{sectionsVisible.installConfig ? '▼' : '►'}</span>
+            <h2 className="h-card">{t('settings.installConfig')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.installConfig ? '▼' : '►'}</span>
           </div>
 
           {sectionsVisible.installConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.baseUrl')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.baseUrlDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.baseUrl')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.baseUrlDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2515,23 +2504,23 @@ const SettingsPage: React.FC = () => {
                     value={installConfig.baseUrl}
                     onChange={(e) => handleInstallConfigChange('baseUrl', e.target.value)}
                     placeholder={t('settings.baseUrlPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveInstallConfig('baseUrl')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.pythonIndexUrl')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.pythonIndexUrlDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.pythonIndexUrl')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.pythonIndexUrlDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2539,23 +2528,23 @@ const SettingsPage: React.FC = () => {
                     value={installConfig.pythonIndexUrl}
                     onChange={(e) => handleInstallConfigChange('pythonIndexUrl', e.target.value)}
                     placeholder={t('settings.pythonIndexUrlPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveInstallConfig('pythonIndexUrl')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
                 </div>
               </div>
 
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-2">
-                  <h3 className="font-medium text-gray-700">{t('settings.npmRegistry')}</h3>
-                  <p className="text-sm text-gray-500">{t('settings.npmRegistryDescription')}</p>
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.npmRegistry')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>{t('settings.npmRegistryDescription')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -2563,13 +2552,13 @@ const SettingsPage: React.FC = () => {
                     value={installConfig.npmRegistry}
                     onChange={(e) => handleInstallConfigChange('npmRegistry', e.target.value)}
                     placeholder={t('settings.npmRegistryPlaceholder')}
-                    className="flex-1 mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm form-input"
+                    className="ds-input" style={{ flex: 1 }}
                     disabled={loading}
                   />
                   <button
                     onClick={() => saveInstallConfig('npmRegistry')}
                     disabled={loading}
-                    className="mt-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                    className="ds-btn primary"
                   >
                     {t('common.save')}
                   </button>
@@ -2581,14 +2570,14 @@ const SettingsPage: React.FC = () => {
       </PermissionChecker>
 
       {/* Change Password */}
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card" data-section="password">
+      <div className="card" style={{ marginBottom: 12 }} data-section="password">
         <div
-          className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
           onClick={() => toggleSection('password')}
           role="button"
         >
-          <h2 className="font-semibold text-gray-800">{t('auth.changePassword')}</h2>
-          <span className="text-gray-500">{sectionsVisible.password ? '▼' : '►'}</span>
+          <h2 className="h-card">{t('auth.changePassword')}</h2>
+          <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.password ? '▼' : '►'}</span>
         </div>
 
         {sectionsVisible.password && (
@@ -2600,21 +2589,21 @@ const SettingsPage: React.FC = () => {
 
       {/* Export MCP Settings */}
       <PermissionChecker permissions={PERMISSIONS.SETTINGS_EXPORT_CONFIG}>
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6 dashboard-card">
+        <div className="card" style={{ marginBottom: 12 }}>
           <div
-            className="flex justify-between items-center cursor-pointer transition-colors duration-200 hover:text-blue-600 py-4 px-6"
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', padding: '14px 18px', borderBottom: '1px solid var(--line-2)' }}
             onClick={() => toggleSection('exportConfig')}
           >
-            <h2 className="font-semibold text-gray-800">{t('settings.exportMcpSettings')}</h2>
-            <span className="text-gray-500">{sectionsVisible.exportConfig ? '▼' : '►'}</span>
+            <h2 className="h-card">{t('settings.exportMcpSettings')}</h2>
+            <span style={{ color: 'var(--ink-3)', fontSize: 11 }}>{sectionsVisible.exportConfig ? '▼' : '►'}</span>
           </div>
 
           {sectionsVisible.exportConfig && (
-            <div className="space-y-4 pb-4 px-6">
-              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+            <div style={{ padding: '0 18px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ padding: '12px 14px', background: 'var(--bg-2)', borderRadius: 8, border: '1px solid var(--line-2)' }}>
                 <div className="mb-4">
-                  <h3 className="font-medium text-gray-700">{t('settings.mcpSettingsJson')}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink)' }}>{t('settings.mcpSettingsJson')}</h3>
+                  <p style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                     {t('settings.mcpSettingsJsonDescription')}
                   </p>
                 </div>
@@ -2623,7 +2612,7 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleCopyConfig}
                       disabled={!mcpSettingsJson}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                      className="ds-btn primary"
                     >
                       {copiedConfig ? <Check size={16} /> : <Copy size={16} />}
                       {copiedConfig ? t('common.copied') : t('settings.copyToClipboard')}
@@ -2631,7 +2620,7 @@ const SettingsPage: React.FC = () => {
                     <button
                       onClick={handleDownloadConfig}
                       disabled={!mcpSettingsJson}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium disabled:opacity-50 btn-primary"
+                      className="ds-btn primary"
                     >
                       <Download size={16} />
                       {t('settings.downloadJson')}
