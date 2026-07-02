@@ -1,6 +1,7 @@
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { ServerInfo, ServerConfig } from '../types/index.js';
+import { formatErrorForLogging } from '../utils/serialization.js';
 
 export interface KeepAliveOptions {
   enabled?: boolean;
@@ -9,7 +10,7 @@ export interface KeepAliveOptions {
 
 /**
  * Set up keep-alive ping for MCP client connections (SSE or Streamable HTTP).
- * Keepalive is controlled per-server via `serverConfig.enableKeepAlive` (default off).
+ * Remote server health checks are opt-in because probes may count as upstream calls.
  */
 export const setupClientKeepAlive = async (
   serverInfo: ServerInfo,
@@ -39,23 +40,66 @@ export const setupClientKeepAlive = async (
 
   // Default interval: 60 seconds
   const interval = serverConfig.keepAliveInterval || 60000;
+  let isChecking = false;
+
+  const isHealthCheckCurrent = (activeClient: NonNullable<ServerInfo['client']>): boolean =>
+    serverInfo.client === activeClient &&
+    serverInfo.enabled !== false &&
+    serverInfo.status !== 'connecting' &&
+    serverInfo.status !== 'oauth_required';
+
+  const checkRemoteHealth = async (): Promise<void> => {
+    const activeClient = serverInfo.client;
+    if (
+      !activeClient ||
+      serverInfo.enabled === false ||
+      serverInfo.status === 'connecting' ||
+      serverInfo.status === 'oauth_required' ||
+      isChecking
+    ) {
+      return;
+    }
+
+    isChecking = true;
+
+    try {
+      // Use client.ping() if available, otherwise fallback to listTools.
+      if (typeof (activeClient as any).ping === 'function') {
+        await (activeClient as any).ping({ ...(serverInfo.options || {}), timeout: 5000 });
+      } else {
+        await activeClient.listTools({}, { ...(serverInfo.options || {}), timeout: 5000 });
+      }
+
+      if (!isHealthCheckCurrent(activeClient)) {
+        return;
+      }
+
+      if (serverInfo.status !== 'connected') {
+        console.log('Keep-alive ping restored server connection', {
+          serverName: serverInfo.name,
+        });
+      }
+      serverInfo.status = 'connected';
+      serverInfo.error = null;
+    } catch (error) {
+      if (!isHealthCheckCurrent(activeClient)) {
+        return;
+      }
+
+      const message = formatErrorForLogging(error);
+      const nextError = `Keep-alive failed: ${message}`;
+      if (serverInfo.status !== 'disconnected' || serverInfo.error !== nextError) {
+        console.warn('Keep-alive ping failed', { serverName: serverInfo.name, error });
+      }
+      serverInfo.status = 'disconnected';
+      serverInfo.error = nextError;
+    } finally {
+      isChecking = false;
+    }
+  };
 
   serverInfo.keepAliveIntervalId = setInterval(async () => {
-    try {
-      if (serverInfo.client && serverInfo.status === 'connected') {
-        // Use client.ping() if available, otherwise fallback to listTools
-        if (typeof (serverInfo.client as any).ping === 'function') {
-          await (serverInfo.client as any).ping();
-          console.log('Keep-alive ping successful', { serverName: serverInfo.name });
-        } else {
-          await serverInfo.client
-            .listTools({}, { ...(serverInfo.options || {}), timeout: 5000 })
-            .catch(() => void 0);
-        }
-      }
-    } catch (error) {
-      console.warn('Keep-alive ping failed', { serverName: serverInfo.name, error });
-    }
+    await checkRemoteHealth();
   }, interval);
 
   console.log('Keep-alive enabled for server', {
