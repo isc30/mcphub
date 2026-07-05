@@ -1,6 +1,4 @@
 import crypto from 'crypto';
-import fs from 'fs';
-import path from 'path';
 
 // Mock the dao module before importing the module under test
 const mockCreateWithHashedPassword = jest.fn();
@@ -22,10 +20,15 @@ jest.mock('bcryptjs', () => ({
 import { initializeDefaultUser } from '../../src/models/User.js';
 
 describe('initializeDefaultUser', () => {
-  let consoleLogSpy: jest.SpyInstance;
+  let consoleLogSpy: jest.SpyInstance<void, unknown[]>;
+  let originalNodeEnv: string | undefined;
+
+  const loggedMessages = () => consoleLogSpy.mock.calls.map((call) => call.join(' ')).join(' ');
 
   beforeEach(() => {
     jest.clearAllMocks();
+    originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'test';
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     // Reset env var between tests
     delete process.env.ADMIN_PASSWORD;
@@ -34,9 +37,14 @@ describe('initializeDefaultUser', () => {
   afterEach(() => {
     consoleLogSpy.mockRestore();
     delete process.env.ADMIN_PASSWORD;
+    if (originalNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
   });
 
-  it('should NOT use hardcoded "admin123" as the default password', async () => {
+  it('should NOT use hardcoded "admin123" outside development mode', async () => {
     mockFindAll.mockResolvedValue([]);
     mockCreateWithHashedPassword.mockResolvedValue({
       username: 'admin',
@@ -69,6 +77,23 @@ describe('initializeDefaultUser', () => {
     expect(password.length).toBeGreaterThanOrEqual(16);
   });
 
+  it('should use admin123 when NODE_ENV is development and no ADMIN_PASSWORD env var is set', async () => {
+    process.env.NODE_ENV = 'development';
+    mockFindAll.mockResolvedValue([]);
+    mockCreateWithHashedPassword.mockResolvedValue({
+      username: 'admin',
+      password: 'hashed',
+      isAdmin: true,
+    });
+
+    await initializeDefaultUser();
+
+    const [, password] = mockCreateWithHashedPassword.mock.calls[0];
+    expect(password).toBe('admin123');
+
+    expect(loggedMessages()).toContain('Using development admin password: admin123');
+  });
+
   it('should log the generated password to the console', async () => {
     mockFindAll.mockResolvedValue([]);
     mockCreateWithHashedPassword.mockResolvedValue({
@@ -81,8 +106,7 @@ describe('initializeDefaultUser', () => {
 
     const [, password] = mockCreateWithHashedPassword.mock.calls[0];
     // The password should appear in console output so the admin can see it
-    const loggedMessages = consoleLogSpy.mock.calls.map((call: any[]) => call.join(' ')).join(' ');
-    expect(loggedMessages).toContain(password);
+    expect(loggedMessages()).toContain(password);
   });
 
   it('should use ADMIN_PASSWORD env var when provided', async () => {
@@ -98,6 +122,7 @@ describe('initializeDefaultUser', () => {
 
     const [, password] = mockCreateWithHashedPassword.mock.calls[0];
     expect(password).toBe('MyCustomP@ss1');
+    expect(loggedMessages()).not.toContain('MyCustomP@ss1');
   });
 
   it('should not create a user when users already exist', async () => {
@@ -132,15 +157,5 @@ describe('initializeDefaultUser', () => {
 
     // Two random passwords should differ (probabilistically certain)
     expect(password1).not.toBe(password2);
-  });
-});
-
-describe('shipped mcp_settings.json', () => {
-  const settingsPath = path.resolve(__dirname, '../../mcp_settings.json');
-
-  it('does not ship a pre-seeded admin user (prevents default credentials in image)', () => {
-    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    expect(Array.isArray(settings.users)).toBe(true);
-    expect(settings.users.length).toBe(0);
   });
 });

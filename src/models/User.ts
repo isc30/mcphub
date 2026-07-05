@@ -129,16 +129,28 @@ export const initializeDefaultUser = async (): Promise<void> => {
   const users = await userDao.findAll();
 
   if (users.length === 0) {
-    const adminPasswordFromEnv = process.env.ADMIN_PASSWORD;
-    const password = adminPasswordFromEnv || generateRandomPassword();
-    await userDao.createWithHashedPassword('admin', password, true);
-    console.log('Default admin user created');
+    const createDefaultAdmin = async (password: string): Promise<void> => {
+      await userDao.createWithHashedPassword('admin', password, true);
+      console.log('Default admin user created');
+    };
 
-    if (!adminPasswordFromEnv) {
-      console.log('========================================');
-      console.log('  Generated admin password: ' + password);
-      console.log('  Please change this password after first login.');
-      console.log('========================================');
+    const adminPasswordFromEnv = process.env.ADMIN_PASSWORD;
+    if (adminPasswordFromEnv) {
+      await createDefaultAdmin(adminPasswordFromEnv);
+      return;
     }
+
+    if (process.env.NODE_ENV === 'development') {
+      await createDefaultAdmin('admin123');
+      console.log('Using development admin password: admin123');
+      return;
+    }
+
+    const generatedPassword = generateRandomPassword();
+    await createDefaultAdmin(generatedPassword);
+    console.log('========================================');
+    console.log('  Generated admin password: ' + generatedPassword);
+    console.log('  Please change this password after first login.');
+    console.log('========================================');
   }
 };

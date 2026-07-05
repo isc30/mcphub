@@ -113,6 +113,8 @@ pnpm install
 pnpm dev
 ```
 
+Le développement local utilise `admin` / `admin123` et stocke sa copie de configuration modifiable dans `data/mcp_settings.dev.json`, afin que le `mcp_settings.json` du dépôt reste sans identifiants par défaut.
+
 > Pour les utilisateurs Windows, démarrez le backend et le frontend séparément : `pnpm backend:dev`, `pnpm frontend:dev`
 
 📖 Consultez le [Guide de développement](https://docs.mcphub.app/development) pour les instructions de configuration détaillées.

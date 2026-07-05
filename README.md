@@ -134,6 +134,8 @@ pnpm install
 pnpm dev
 ```
 
+Local development uses `admin` / `admin123` and stores its writable settings copy at `data/mcp_settings.dev.json`, so the repository `mcp_settings.json` stays credential-free.
+
 > For Windows users, start backend and frontend separately: `pnpm backend:dev`, `pnpm frontend:dev`
 
 📖 See [Development Guide](https://docs.mcphub.app/development) for detailed setup instructions.
