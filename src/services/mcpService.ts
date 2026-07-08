@@ -406,8 +406,8 @@ const getOrCreateIsolatedClient = async (
       console.warn(
         `Session ${sessionId} was deleted during isolated client creation for ${serverInfo.name}, closing new client`,
       );
-      try { client.close(); } catch {}
-      try { transport.close(); } catch {}
+      try { client.close(); } catch { /* empty */ }
+      try { transport.close(); } catch { /* empty */ }
       throw new Error(`Session ${sessionId} no longer exists`);
     }
 
