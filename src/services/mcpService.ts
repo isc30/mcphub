@@ -321,12 +321,23 @@ const cleanupIsolatedSession = (sessionId: string): void => {
         console.warn(`[${serverName}] Error closing isolated client for session ${sessionId}:`, e);
       }
       try {
+        // For stdio transports, kill the full process tree to avoid orphans
+        const pid = (transport as any)?.childProcess?.pid;
+        if (pid) {
+          treeKill(pid, 'SIGTERM', () => {});
+        }
         transport.close();
       } catch (e) {
         console.warn(`[${serverName}] Error closing isolated transport for session ${sessionId}:`, e);
       }
     }
     sessionIsolatedClients.delete(sessionId);
+    // Clean up any leftover creation locks for this session
+    for (const key of isolatedClientCreationLocks.keys()) {
+      if (key.startsWith(`${sessionId}:`)) {
+        isolatedClientCreationLocks.delete(key);
+      }
+    }
     console.log(`Cleaned up isolated clients for session: ${sessionId}`);
   }
 };
@@ -349,11 +360,13 @@ const setSessionIsolatedClient = (
 /**
  * Get or create a per-session isolated upstream client for a server.
  * Used when the server has `isolate: true` in its config.
+ * Uses a creation lock to prevent duplicate connections from concurrent calls.
  */
 const getOrCreateIsolatedClient = async (
   sessionId: string,
   serverInfo: ServerInfo,
 ): Promise<{ client: Client; transport: any }> => {
+  // Quick check without lock — already exists
   const sessionClients = sessionIsolatedClients.get(sessionId);
   if (sessionClients) {
     const existing = sessionClients.get(serverInfo.name);
@@ -362,20 +375,54 @@ const getOrCreateIsolatedClient = async (
     }
   }
 
-  // Create a new dedicated client + transport for this session
-  const serverConfig = serverInfo.config;
-  if (!serverConfig) {
-    throw new Error(`Server config not found for isolated server: ${serverInfo.name}`);
+  // Use a lock keyed by session+server to prevent concurrent duplicate creation
+  const lockKey = `${sessionId}:${serverInfo.name}`;
+  const existingLock = isolatedClientCreationLocks.get(lockKey);
+  if (existingLock) {
+    return existingLock;
   }
 
-  const transport = await createTransportFromConfig(serverInfo.name, serverConfig);
-  const client = createUpstreamMcpClient(serverInfo.name, () => serverInfo);
-  await client.connect(transport, serverInfo.options || {});
+  const createPromise = (async (): Promise<{ client: Client; transport: any }> => {
+    // Re-check after acquiring the lock — another call may have created it
+    const sessionClientsAfterLock = sessionIsolatedClients.get(sessionId);
+    if (sessionClientsAfterLock) {
+      const existing = sessionClientsAfterLock.get(serverInfo.name);
+      if (existing) {
+        return existing;
+      }
+    }
 
-  setSessionIsolatedClient(sessionId, serverInfo.name, client, transport);
-  console.log(`Created isolated client for session ${sessionId} -> ${serverInfo.name}`);
+    const serverConfig = serverInfo.config;
+    if (!serverConfig) {
+      throw new Error(`Server config not found for isolated server: ${serverInfo.name}`);
+    }
 
-  return { client, transport };
+    const transport = await createTransportFromConfig(serverInfo.name, serverConfig);
+    const client = createUpstreamMcpClient(serverInfo.name, () => serverInfo);
+    await client.connect(transport, serverInfo.options || {});
+
+    // Guard: session may have been deleted during async creation
+    if (!sessionIsolatedClients.has(sessionId)) {
+      console.warn(
+        `Session ${sessionId} was deleted during isolated client creation for ${serverInfo.name}, closing new client`,
+      );
+      try { client.close(); } catch {}
+      try { transport.close(); } catch {}
+      throw new Error(`Session ${sessionId} no longer exists`);
+    }
+
+    setSessionIsolatedClient(sessionId, serverInfo.name, client, transport);
+    console.log(`Created isolated client for session ${sessionId} -> ${serverInfo.name}`);
+
+    return { client, transport };
+  })();
+
+  isolatedClientCreationLocks.set(lockKey, createPromise);
+  createPromise.finally(() => {
+    isolatedClientCreationLocks.delete(lockKey);
+  });
+
+  return createPromise;
 };
 
 export const notifyToolChanged = async (
@@ -567,6 +614,9 @@ let serverInfos: ServerInfo[] = [];
 // Per-session upstream clients for isolated servers (isolate: true).
 // Map<sessionId, Map<serverName, { client, transport }>>
 const sessionIsolatedClients = new Map<string, Map<string, { client: Client; transport: any }>>();
+
+// Locks to prevent concurrent creation of the same isolated client
+const isolatedClientCreationLocks = new Map<string, Promise<any>>();
 
 // Track servers pending a cache-refresh reinstall.
 // Consumed once by createTransportFromConfig on the next reconnect.
@@ -2636,11 +2686,9 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
       // Call the tool on the target server (MCP servers)
       // For servers with isolate: true, use a per-session dedicated client
       let toolClient: Client;
-      let isolatedTransport: any | undefined;
       if (targetServerInfo.config?.isolate && sessionId) {
         const isolated = await getOrCreateIsolatedClient(sessionId, targetServerInfo);
         toolClient = isolated.client;
-        isolatedTransport = isolated.transport;
       } else {
         if (!targetServerInfo.client) {
           throw new Error(`Client not found for server: ${targetServerInfo.name}`);
