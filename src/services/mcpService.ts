@@ -303,6 +303,79 @@ export const getMcpServer = async (sessionId?: string, group?: string): Promise<
 
 export const deleteMcpServer = (sessionId: string): void => {
   delete servers[sessionId];
+  // Clean up any per-session isolated upstream clients for this session
+  cleanupIsolatedSession(sessionId);
+};
+
+/**
+ * Clean up per-session isolated upstream clients for a given session.
+ * Closes all clients and transports, then removes the session entry.
+ */
+const cleanupIsolatedSession = (sessionId: string): void => {
+  const sessionClients = sessionIsolatedClients.get(sessionId);
+  if (sessionClients) {
+    for (const [serverName, { client, transport }] of sessionClients) {
+      try {
+        client.close();
+      } catch (e) {
+        console.warn(`[${serverName}] Error closing isolated client for session ${sessionId}:`, e);
+      }
+      try {
+        transport.close();
+      } catch (e) {
+        console.warn(`[${serverName}] Error closing isolated transport for session ${sessionId}:`, e);
+      }
+    }
+    sessionIsolatedClients.delete(sessionId);
+    console.log(`Cleaned up isolated clients for session: ${sessionId}`);
+  }
+};
+
+/** Helper to write an isolated session upstream client into the tracking map. */
+const setSessionIsolatedClient = (
+  sessionId: string,
+  serverName: string,
+  client: Client,
+  transport: any,
+): void => {
+  let sessionClients = sessionIsolatedClients.get(sessionId);
+  if (!sessionClients) {
+    sessionClients = new Map();
+    sessionIsolatedClients.set(sessionId, sessionClients);
+  }
+  sessionClients.set(serverName, { client, transport });
+};
+
+/**
+ * Get or create a per-session isolated upstream client for a server.
+ * Used when the server has `isolate: true` in its config.
+ */
+const getOrCreateIsolatedClient = async (
+  sessionId: string,
+  serverInfo: ServerInfo,
+): Promise<{ client: Client; transport: any }> => {
+  const sessionClients = sessionIsolatedClients.get(sessionId);
+  if (sessionClients) {
+    const existing = sessionClients.get(serverInfo.name);
+    if (existing) {
+      return existing;
+    }
+  }
+
+  // Create a new dedicated client + transport for this session
+  const serverConfig = serverInfo.config;
+  if (!serverConfig) {
+    throw new Error(`Server config not found for isolated server: ${serverInfo.name}`);
+  }
+
+  const transport = await createTransportFromConfig(serverInfo.name, serverConfig);
+  const client = createUpstreamMcpClient(serverInfo.name, () => serverInfo);
+  await client.connect(transport, serverInfo.options || {});
+
+  setSessionIsolatedClient(sessionId, serverInfo.name, client, transport);
+  console.log(`Created isolated client for session ${sessionId} -> ${serverInfo.name}`);
+
+  return { client, transport };
 };
 
 export const notifyToolChanged = async (
@@ -490,6 +563,10 @@ const normalizeResourceForCache = (resource: McpResource): Resource => {
 
 // Store all server information
 let serverInfos: ServerInfo[] = [];
+
+// Per-session upstream clients for isolated servers (isolate: true).
+// Map<sessionId, Map<serverName, { client, transport }>>
+const sessionIsolatedClients = new Map<string, Map<string, { client: Client; transport: any }>>();
 
 // Track servers pending a cache-refresh reinstall.
 // Consumed once by createTransportFromConfig on the next reconnect.
@@ -1119,14 +1196,16 @@ const callToolWithReconnect = async (
   toolParams: any,
   options?: any,
   maxRetries: number = 1,
+  clientOverride?: Client, // Optional: use this client instead of serverInfo.client (for isolated sessions)
 ): Promise<any> => {
-  if (!serverInfo.client) {
+  const client = clientOverride || serverInfo.client;
+  if (!client) {
     throw new Error(`Client not found for server: ${serverInfo.name}`);
   }
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const result = await serverInfo.client.callTool(toolParams, undefined, options || {});
+      const result = await client.callTool(toolParams, undefined, options || {});
       // Check auth error
       checkAuthError(result);
       return result;
@@ -2555,9 +2634,18 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
       }
 
       // Call the tool on the target server (MCP servers)
-      const client = targetServerInfo.client;
-      if (!client) {
-        throw new Error(`Client not found for server: ${targetServerInfo.name}`);
+      // For servers with isolate: true, use a per-session dedicated client
+      let toolClient: Client;
+      let isolatedTransport: any | undefined;
+      if (targetServerInfo.config?.isolate && sessionId) {
+        const isolated = await getOrCreateIsolatedClient(sessionId, targetServerInfo);
+        toolClient = isolated.client;
+        isolatedTransport = isolated.transport;
+      } else {
+        if (!targetServerInfo.client) {
+          throw new Error(`Client not found for server: ${targetServerInfo.name}`);
+        }
+        toolClient = targetServerInfo.client;
       }
 
       // Use toolArgs if it has properties, otherwise fallback to request.params.arguments
@@ -2567,6 +2655,7 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
         toolName: targetToolName,
         serverName: targetServerInfo.name,
         arguments: summarizeArgumentsForLogging(finalArgs),
+        isolated: !!targetServerInfo.config?.isolate,
       });
 
       const cleanToolName = normalizeToolNameForServer(targetServerInfo.name, targetToolName);
@@ -2578,6 +2667,8 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
           arguments: finalArgs,
         },
         targetServerInfo.options || {},
+        1,
+        toolClient,
       );
       await settleHostedIfNeeded({
         success: !result.isError,
@@ -2726,9 +2817,16 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
     }
 
     // Handle MCP servers
-    const client = serverInfo.client;
-    if (!client) {
-      throw new Error(`Client not found for server: ${serverInfo.name}`);
+    // For servers with isolate: true, use a per-session dedicated client
+    let toolClient: Client;
+    if (serverInfo.config?.isolate && sessionId) {
+      const isolated = await getOrCreateIsolatedClient(sessionId, serverInfo);
+      toolClient = isolated.client;
+    } else {
+      if (!serverInfo.client) {
+        throw new Error(`Client not found for server: ${serverInfo.name}`);
+      }
+      toolClient = serverInfo.client;
     }
 
     const cleanToolName = normalizeToolNameForServer(serverInfo.name, routeToolName);
@@ -2737,6 +2835,8 @@ export const handleCallToolRequest = async (request: any, extra: any) => {
       serverInfo,
       { ...request.params, name: cleanToolName },
       serverInfo.options || {},
+      1,
+      toolClient,
     );
     await settleHostedIfNeeded({
       success: !result.isError,

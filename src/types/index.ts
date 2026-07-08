@@ -462,6 +462,7 @@ export interface ServerConfig {
       createdAt?: number;
     };
   };
+  isolate?: boolean; // When true, creates a dedicated upstream client per session for session isolation
   // OpenAPI specific configuration
   openapi?: {
     url?: string; // OpenAPI specification URL
