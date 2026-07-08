@@ -1274,13 +1274,17 @@ const callToolWithReconnect = async (
         );
 
         try {
-          // Close existing connection
-          if (serverInfo.keepAliveIntervalId) {
+          // Close existing connection — when clientOverride is set, the
+          // shared serverInfo.client may be stale or undefined, so only
+          // close it if it was the one we were using.
+          if (!clientOverride && serverInfo.keepAliveIntervalId) {
             clearInterval(serverInfo.keepAliveIntervalId);
             serverInfo.keepAliveIntervalId = undefined;
           }
 
-          serverInfo.client.close();
+          if (!clientOverride && serverInfo.client) {
+            serverInfo.client.close();
+          }
           serverInfo.transport.close();
 
           const server = await getServerDao().findById(serverInfo.name);
