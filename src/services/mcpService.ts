@@ -1851,6 +1851,9 @@ export const getServersInfo = async (
         const serverConfig = allServers.find((server) => server.name === name);
         const enabled = serverConfig ? serverConfig.enabled !== false : true;
         const resolvedType = inferServerType(serverConfig);
+        const oauthConnected = Boolean(
+          serverConfig?.oauth?.accessToken || serverConfig?.oauth?.refreshToken,
+        );
 
         // Add enabled status and custom description to each tool
         const toolsWithEnabled = tools.map((tool) => {
@@ -1880,13 +1883,19 @@ export const getServersInfo = async (
           resources,
           createTime,
           enabled,
-          oauth: oauth
-            ? {
-                authorizationUrl: oauth.authorizationUrl,
-                state: oauth.state,
-                // Don't expose codeVerifier to frontend for security
-              }
-            : undefined,
+          oauth:
+            oauth || oauthConnected
+              ? {
+                  ...(oauth
+                    ? {
+                        authorizationUrl: oauth.authorizationUrl,
+                        state: oauth.state,
+                        // Don't expose codeVerifier to frontend for security
+                      }
+                    : {}),
+                  ...(oauthConnected ? { connected: true } : {}),
+                }
+              : undefined,
           config:
             resolvedType || serverConfig?.description || serverConfig?.command
               ? {
@@ -2122,37 +2131,73 @@ function checkAuthError(result: any) {
   }
 }
 
+const closeServerRuntime = (serverInfo: ServerInfo): void => {
+  if (serverInfo.keepAliveIntervalId) {
+    clearInterval(serverInfo.keepAliveIntervalId);
+    serverInfo.keepAliveIntervalId = undefined;
+    console.log('Cleared MCP server keep-alive interval');
+  }
+
+  const candidateTransport = serverInfo.transport as
+    | {
+        pid?: unknown;
+      }
+    | undefined;
+  const stdioPid = typeof candidateTransport?.pid === 'number' ? candidateTransport.pid : null;
+
+  if (serverInfo.client) {
+    try {
+      serverInfo.client.close();
+    } catch {
+      console.warn('Error closing MCP client during runtime shutdown');
+    }
+    serverInfo.client = undefined;
+  }
+
+  if (serverInfo.transport) {
+    try {
+      serverInfo.transport.close();
+    } catch {
+      console.warn('Error closing MCP transport during runtime shutdown');
+    }
+    serverInfo.transport = undefined;
+  }
+
+  if (stdioPid) {
+    killStdioProcessTree(serverInfo.name, stdioPid);
+  }
+
+  console.log('Closed MCP server client and transport');
+};
+
 // Close server client and transport
 function closeServer(name: string) {
   const serverInfo = serverInfos.find((serverInfo) => serverInfo.name === name);
-  if (serverInfo && serverInfo.client && serverInfo.transport) {
-    // Clear keep-alive interval if exists
-    if (serverInfo.keepAliveIntervalId) {
-      clearInterval(serverInfo.keepAliveIntervalId);
-      serverInfo.keepAliveIntervalId = undefined;
-      console.log(`Cleared keep-alive interval for server: ${serverInfo.name}`);
-    }
-
-    // Capture the child PID via duck-typing. `instanceof StdioClientTransport`
-    // is unreliable under pnpm's "dual package hazard" — a different copy of
-    // @modelcontextprotocol/sdk in node_modules makes the check return false
-    // even for genuine stdio transports. The `pid` getter is the SDK's public
-    // contract, so checking for it is both safer and version-agnostic.
-    const candidateTransport = serverInfo.transport as {
-      pid?: unknown;
-    };
-    const stdioPid = typeof candidateTransport.pid === 'number' ? candidateTransport.pid : null;
-
-    serverInfo.client.close();
-    serverInfo.transport.close();
-
-    if (stdioPid) {
-      killStdioProcessTree(name, stdioPid);
-    }
-
-    console.log(`Closed client and transport for server: ${serverInfo.name}`);
+  if (serverInfo) {
+    closeServerRuntime(serverInfo);
   }
 }
+
+export const resetServerOAuthConnection = (name: string): boolean => {
+  const serverInfo = serverInfos.find((serverInfo) => serverInfo.name === name);
+  if (!serverInfo) {
+    return false;
+  }
+
+  closeServerRuntime(serverInfo);
+  serverInfo.status = 'oauth_required';
+  serverInfo.error = null;
+  serverInfo.tools = [];
+  serverInfo.prompts = [];
+  serverInfo.resources = [];
+  serverInfo.oauth = undefined;
+
+  broadcastToolListChanged();
+  broadcastPromptListChanged();
+  broadcastResourceListChanged();
+
+  return true;
+};
 
 // Kill the entire process tree of a stdio transport's child process.
 //
