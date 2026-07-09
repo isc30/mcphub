@@ -416,16 +416,21 @@ const getOrCreateIsolatedClient = async (
     await client.connect(transport, serverInfo.options || {});
 
     // Guard: the session was cleaned up during the async connect if its map was deleted (identity no longer matches) — close the just-created connection.
-    if (sessionIsolatedClients.get(sessionId) !== reservedClients) {
-      console.warn(
-        `Session ${sessionId} was deleted during isolated client creation for ${serverInfo.name}, closing new client`,
-      );
+if (sessionIsolatedClients.get(sessionId) !== reservedClients) {
+  console.warn(
+    "Session " + sessionId + " was deleted during isolated client creation for " + serverInfo.name + ", closing new client",
+  );
 
-      try { client.close(); } catch { /* empty */ }
-      try { transport.close(); } catch { /* empty */ }
+  try { client.close(); } catch { /* empty */ }
+  const candidateTransport = transport as { pid?: unknown };
+  const stdioPid = typeof candidateTransport.pid === 'number' ? candidateTransport.pid : null;
+  try { transport.close(); } catch { /* empty */ }
+  if (stdioPid) {
+    killStdioProcessTree(serverInfo.name, stdioPid);
+  }
 
-      throw new Error(`Session ${sessionId} no longer exists`);
-    }
+  throw new Error("Session " + sessionId + " no longer exists");
+}
 
     setSessionIsolatedClient(sessionId, serverInfo.name, client, transport);
     console.log(`Created isolated client for session ${sessionId} -> ${serverInfo.name}`);
