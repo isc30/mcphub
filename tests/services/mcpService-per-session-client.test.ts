@@ -326,6 +326,45 @@ describe('mcpService per-session client isolation (perSessionClient)', () => {
     expect(mockTreeKill).toHaveBeenCalledWith(4242, 'SIGTERM', expect.any(Function));
   });
 
+  it('closes the client and kills the stdio process tree when the isolated connect fails', async () => {
+    const serverInfo = makeServerInfo({
+      type: 'stdio',
+      url: undefined,
+      command: 'npx',
+      args: ['-y', 'some-stateful-server'],
+      perSessionClient: true,
+    });
+    mcpService.setServerInfosForTest([serverInfo]);
+
+    // Make the next isolated client's handshake fail so we exercise the
+    // connect-failure cleanup path (transport + process tree must be torn down).
+    const { Client: MockClient } = jest.requireMock('@modelcontextprotocol/sdk/client/index.js');
+    MockClient.mockImplementationOnce(() => {
+      const client = {
+        connect: jest.fn().mockRejectedValue(new Error('handshake failed')),
+        close: jest.fn(),
+      };
+      mockCreatedClients.push(client);
+      return client;
+    });
+
+    const result = await callTool('session-fail');
+    expect(result.isError).toBe(true);
+
+    const failedClient = mockCreatedClients[0];
+    const stdioTransport = mockCreatedTransports.find((t) => t instanceof MockStdioClientTransport);
+
+    // The half-open client and its transport were closed, and the whole stdio
+    // process tree was killed rather than left as an orphan.
+    expect(failedClient.close).toHaveBeenCalledTimes(1);
+    expect(stdioTransport.close).toHaveBeenCalledTimes(1);
+    expect(mockTreeKill).toHaveBeenCalledWith(4242, 'SIGTERM', expect.any(Function));
+
+    // No stale entry was cached — a retry builds a brand-new isolated client.
+    await callTool('session-fail');
+    expect(mockCreatedClients).toHaveLength(2);
+  });
+
   it('drains isolated clients on cleanupAllServers', async () => {
     const serverInfo = makeServerInfo({ perSessionClient: true });
     mcpService.setServerInfosForTest([serverInfo]);

@@ -308,6 +308,32 @@ export const deleteMcpServer = (sessionId: string): void => {
 };
 
 /**
+ * Close an isolated upstream client and its transport, killing the whole stdio
+ * process tree (to avoid orphaned wrappers like `npx`) when applicable.
+ */
+const closeIsolatedClient = (serverName: string, client: Client, transport: any): void => {
+  try {
+    client.close();
+  } catch (e) {
+    console.warn(`[${serverName}] Error closing isolated client:`, e);
+  }
+
+  const candidateTransport = transport as { pid?: unknown };
+  const stdioPid = typeof candidateTransport.pid === 'number' ? candidateTransport.pid : null;
+
+  try {
+    transport.close();
+  } catch (e) {
+    console.warn(`[${serverName}] Error closing isolated transport:`, e);
+  }
+
+  // For stdio transports, kill the whole process tree to avoid orphans
+  if (stdioPid) {
+    killStdioProcessTree(serverName, stdioPid);
+  }
+};
+
+/**
  * Clean up per-session isolated upstream clients for a given session.
  * Closes all clients and transports, then removes the session entry.
  */
@@ -315,28 +341,7 @@ const cleanupIsolatedSession = (sessionId: string): void => {
   const sessionClients = sessionIsolatedClients.get(sessionId);
   if (sessionClients) {
     for (const [serverName, { client, transport }] of sessionClients) {
-      try {
-        client.close();
-      } catch (e) {
-        console.warn(`[${serverName}] Error closing isolated client for session ${sessionId}:`, e);
-      }
-
-      const candidateTransport = transport as { pid?: unknown };
-      const stdioPid = typeof candidateTransport.pid === 'number' ? candidateTransport.pid : null;
-
-      try {
-        transport.close();
-      } catch (e) {
-        console.warn(
-          `[${serverName}] Error closing isolated transport for session ${sessionId}:`,
-          e,
-        );
-      }
-
-      // For stdio transports, kill the whole process tree to avoid orphans
-      if (stdioPid) {
-        killStdioProcessTree(serverName, stdioPid);
-      }
+      closeIsolatedClient(serverName, client, transport);
     }
 
     sessionIsolatedClients.delete(sessionId);
@@ -413,24 +418,25 @@ const getOrCreateIsolatedClient = async (
     const reservedClients = sessionIsolatedClients.get(sessionId);
     const transport = await createTransportFromConfig(serverInfo.name, serverConfig);
     const client = createUpstreamMcpClient(serverInfo.name, () => serverInfo);
-    await client.connect(transport, serverInfo.options || {});
 
-    // Guard: the session was cleaned up during the async connect if its map was deleted (identity no longer matches) — close the just-created connection.
-if (sessionIsolatedClients.get(sessionId) !== reservedClients) {
-  console.warn(
-    "Session " + sessionId + " was deleted during isolated client creation for " + serverInfo.name + ", closing new client",
-  );
+    try {
+      await client.connect(transport, serverInfo.options || {});
+    } catch (connectError) {
+      // Connect failed — close the client/transport and kill any spawned
+      // process tree so a failed handshake doesn't leak resources.
+      closeIsolatedClient(serverInfo.name, client, transport);
+      throw connectError;
+    }
 
-  try { client.close(); } catch { /* empty */ }
-  const candidateTransport = transport as { pid?: unknown };
-  const stdioPid = typeof candidateTransport.pid === 'number' ? candidateTransport.pid : null;
-  try { transport.close(); } catch { /* empty */ }
-  if (stdioPid) {
-    killStdioProcessTree(serverInfo.name, stdioPid);
-  }
-
-  throw new Error("Session " + sessionId + " no longer exists");
-}
+    // Guard: the session was cleaned up during the async connect if its map was
+    // deleted (identity no longer matches) — close the just-created connection.
+    if (sessionIsolatedClients.get(sessionId) !== reservedClients) {
+      console.warn(
+        `Session ${sessionId} was deleted during isolated client creation for ${serverInfo.name}, closing new client`,
+      );
+      closeIsolatedClient(serverInfo.name, client, transport);
+      throw new Error(`Session ${sessionId} no longer exists`);
+    }
 
     setSessionIsolatedClient(sessionId, serverInfo.name, client, transport);
     console.log(`Created isolated client for session ${sessionId} -> ${serverInfo.name}`);
@@ -439,9 +445,14 @@ if (sessionIsolatedClients.get(sessionId) !== reservedClients) {
   })();
 
   isolatedClientCreationLocks.set(lockKey, createPromise);
-  createPromise.finally(() => {
-    isolatedClientCreationLocks.delete(lockKey);
-  });
+  // Release the lock once creation settles. The rejection itself is surfaced to
+  // (and handled by) the awaiting caller below; swallow it here so this
+  // bookkeeping chain never becomes an unhandled promise rejection.
+  void createPromise
+    .finally(() => {
+      isolatedClientCreationLocks.delete(lockKey);
+    })
+    .catch(() => undefined);
 
   return createPromise;
 };
