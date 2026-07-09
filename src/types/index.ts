@@ -462,7 +462,7 @@ export interface ServerConfig {
       createdAt?: number;
     };
   };
-  isolate?: boolean; // When true, creates a dedicated upstream client per session for session isolation
+  perSessionClient?: boolean; // When true, creates a dedicated upstream client per downstream session (session isolation for stateful servers like Playwright)
   // OpenAPI specific configuration
   openapi?: {
     url?: string; // OpenAPI specification URL
